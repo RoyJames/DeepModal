@@ -2,3 +2,4 @@
 *.obj
 *.so
 *.msh
+__pycache__
