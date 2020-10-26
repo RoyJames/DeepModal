@@ -12,10 +12,9 @@ cuda_mass_matrix_computer = mod.get_function("compute_mass_matrix")
 
 
 class FEM_model():
-    def __init__(self, vertices, tets, scale = 0.2):
+    def __init__(self, vertices, tets):
         self.vertices = np.asarray(vertices).reshape(-1,3)
         self.tets = np.asarray(tets).reshape(-1,4)
-
 
     def set_material(self, mat):
         mat_config = configparser.ConfigParser()
@@ -27,19 +26,19 @@ class FEM_model():
         self.beta = float(m['beta'])
         self.density = float(m['density'])
 
-    def compute_matrix(self):
+    def create_matrix(self):
         num = self.tets.shape[0]*12*12
-        res = 64
+        cuda_res = 64
         values = np.zeros(num,dtype = np.float64)
         rows = np.zeros(num,dtype = np.int32)
         cols = np.zeros(num,dtype = np.int32)
         cuda_stiff_matrix_computer(
             drv.Out(values), drv.Out(rows), drv.Out(cols),
-            np.int32(res), np.float64(self.youngs), np.float64(self.poison),
+            np.int32(cuda_res), np.float64(self.youngs), np.float64(self.poison),
             drv.In(self.vertices.astype(np.float64).reshape(-1)),
             drv.In(self.tets.astype(np.int32).reshape(-1)),
             np.int32(self.tets.shape[0]),
-            block=(res,1,1), grid=(res,res)
+            block=(cuda_res,1,1), grid=(cuda_res,cuda_res)
         )
         size = len(self.vertices)*3
         self.stiff_matrix = coo_matrix((values, (rows, cols)), shape=(size, size))
@@ -51,11 +50,11 @@ class FEM_model():
         cols = np.zeros(num,dtype = np.int32)
         cuda_mass_matrix_computer(
             drv.Out(values), drv.Out(rows), drv.Out(cols),
-            np.int32(res), np.float64(self.density),
+            np.int32(cuda_res), np.float64(self.density),
             drv.In(self.vertices.astype(np.float64).reshape(-1)),
             drv.In(self.tets.astype(np.int32).reshape(-1)),
             np.int32(self.tets.shape[0]),
-            block=(res,1,1), grid=(res,res)
+            block=(cuda_res,1,1), grid=(cuda_res,cuda_res)
         )
         self.mass_matrix = coo_matrix((values, (rows, cols)), shape=(size, size))
         self.mass_matrix.eliminate_zeros()
