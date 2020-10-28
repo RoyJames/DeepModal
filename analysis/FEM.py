@@ -71,4 +71,7 @@ class FEM_model():
         # print(vals[:100])
         self.vals = vals[valid]
         self.vecs = vecs[:,valid]
+        self.c = (self.alpha*self.vals + self.beta)
+        self.omega = np.sqrt(self.vals)
+        self.omega_d = self.omega*np.sqrt(1 - self.c**2/(self.omega**2*4))
     
