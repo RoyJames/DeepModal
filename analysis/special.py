@@ -111,11 +111,19 @@ class Multipole():
                 self.neumann.append(self.evaluate_derive(m,n,normal))
         self.neumann = np.asarray(self.neumann)
 
-    def dirichlet_reset(self):
-        self.dirichlet = []
-        for n in range(self.scale):
+    @staticmethod
+    @jit(nopython=True)
+    def dirichlet_reset_(scale, h, coeff, p, phi):
+        dirichlet = []
+        for n in range(scale):
             for m in range(-n,n+1):
-                self.dirichlet.append(self.evaluate(m,n))
-        self.dirichlet = np.asarray(self.dirichlet)
+                Y = coeff[abs(m),n]**0.5*p[abs(m),n]*np.exp(1j*abs(m)*phi)
+                if m < 0:
+                    Y = (-1)**m*Y.conjugate()
+                dirichlet.append(h[n]*Y)
+        return np.asarray(dirichlet)
+
+    def dirichlet_reset(self):
+        self.dirichlet = self.dirichlet_reset_(self.scale, self.h, self.coeff, self.p, self.phi)
         
 

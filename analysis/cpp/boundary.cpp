@@ -28,6 +28,16 @@ void dfs(int* flood, int* flags, int res, int x_, int y_, int z_){
         
     }
 }
+auto flood_dfs(py::array_t<int> flags, int res){
+
+    auto info_flags = flags.request();
+    int flood_size = (res+2)*(res+2)*(res+2);
+    auto result = py::array_t<int>(flood_size);
+    int *flood = static_cast<int*>(result.request().ptr);
+    memset(flood, 0, sizeof(int)*flood_size);
+    dfs(flood, static_cast<int*>(info_flags.ptr), res, -1, -1, -1);
+    return result;
+}
 
 auto create(py::array_t<int> flags, py::array_t<double> vertices, py::array_t<int> tets, int res) {
     auto info_flags = flags.request();
@@ -98,4 +108,5 @@ PYBIND11_MODULE(boundary , m) {
                         py::arg("vertices"),
                         py::arg("tets"),
                         py::arg("res"));
+    m.def("flood_dfs", &flood_dfs, py::arg("flags"),py::arg("res"));
 }

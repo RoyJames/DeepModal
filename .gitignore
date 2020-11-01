@@ -3,4 +3,8 @@
 *.so
 *.msh
 *.png
+dataset/**
+dataset
+modedata
+modedata/**
 __pycache__

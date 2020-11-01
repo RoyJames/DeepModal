@@ -63,7 +63,8 @@ def check():
     vox = Hexa_model('dataset/7.obj')
     vox.create_tetra_and_boundary()
     vox.set_transform([center_scale(0.2)])
-
+    print(vox.tets.shape)
+    return
     r_in = 0.1
     r_out = 0.2
     sphere = boundary_mesh(grid=bempp.api.shapes.sphere(h=0.02,r = r_out))
@@ -111,12 +112,6 @@ def check():
     export(f'./modedata/sphere_predict.msh', grid_function=GridFunction(sphere.dp0_space, 
                                                             coefficients=coeff))
     coeff = []
-    for point in sphere.face_centers():
-        poles.reset(k,point)
-        poles.dirichlet_reset()
-        coeff.append((poles.dirichlet*weights).sum())
-    coeff = np.asarray(coeff)
-    dirichlet_fun =  GridFunction(sphere.dp0_space, coefficients=coeff)
-    export(f'./modedata/shpere_truth.msh',grid_function=dirichlet_fun)
+     
 
 check()

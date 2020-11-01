@@ -9,7 +9,7 @@ def mel2hz(m):
     return f
 
 class FrequencyScale():
-    def __init__(self, res = 32, min_freq = 100, max_freq = 10000):
+    def __init__(self, res, min_freq = 100, max_freq = 10000):
         self.resolution = res
         self.m_min = hz2mel(min_freq)
         self.m_max = hz2mel(max_freq)
@@ -19,12 +19,21 @@ class FrequencyScale():
         m = hz2mel(f)
         return int((m-self.m_min)/self.spacing)
 
+    def omega2index(self, omega):
+        f = omega/(2*np.pi)
+        return self.hz2index(f)
+
     def index2hz(self, i):
         m = self.m_min + (i+0.5)*self.spacing
         return mel2hz(m)
 
-    def adjust_omega(self, omega):
-        f = omega / (2*np.pi)
-        idx = self.hz2index(f)
-        f = self.index2hz(idx)
+    def index2omega(self, i):
+        f = self.index2hz(i)
         return f*(2*np.pi)
+
+    def adjust_omega(self, omega):
+        idx = self.omega2index(omega)
+        return self.index2omega(idx)
+        
+
+    
