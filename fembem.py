@@ -1,7 +1,7 @@
 
 import bempp.api
 from bempp.api import export, GridFunction
-from analysis.FEM import FEM_model
+from analysis.FEM import FEM_model, Material
 from analysis.BEM import boundary_mesh, PolesMatrix, SPEED_OF_SOUND, AIR_DENSITY
 import numpy as np
 import os
@@ -21,20 +21,26 @@ def work(file_list):
         if os.path.exists(dirname+'/displacements.npy'):
             continue
         vertices = np.load(dirname+'/vertices.npy')
+        print(dirname)
         boundary_faces = np.load(dirname+'/boundary_faces.npy')
+        print(boundary_faces.shape)
         tets = np.load(dirname + '/tets.npy')
         current_model = boundary_mesh(vertices=vertices, faces=boundary_faces)
         #=====================FEM modal analysis=================
         fem = FEM_model(vertices, tets)
-        fem.set_material(0)
+        fem.set_material(Material.Iron)
         fem.create_matrix()
-        fem.compute_modes(min_freq=100,max_freq=10000)
+        fem.compute_modes(min_freq=20,max_freq=20000)
+        print(len(fem.omega_d))
+        if len(fem.omega_d) < 5:
+            continue
+        if fem.omega_d[0]/(2*np.pi) < 500:
+            continue
         #=====================save data==========================
         export(dirname+'/mesh.msh', grid=current_model.grid)
         np.save(dirname+'/face_centers', current_model.face_centers())
         np.save(dirname+'/face_normals', current_model.normals())
         np.save(dirname+'/omegas', fem.omega_d)
-        
         modes_num = len(fem.vals)
         poles_coeffs = np.zeros((modes_num, pole_matrix.poles.pole_number), dtype = np.complex)
         displacements = np.zeros((modes_num, len(boundary_faces)))

@@ -10,6 +10,14 @@ cuda_stiff_matrix_computer = mod.get_function("compute_stiff_matrix")
 cuda_mass_matrix_computer = mod.get_function("compute_mass_matrix")
 # compute_matrix(float *values, int* rows, int* cols, int res, float youngs, float poison, float* vertices, int *tets, int tets_num)
 
+class Material:
+    Ceramic = 2700,7.2E10,0.19,6,1E-7
+    Glass = 2600,6.2E10,0.20,1,1E-7
+    Wood = 750,1.1E10,0.25,60,2E-6
+    Plastic = 1070,1.4E9,0.35,30,1E-6
+    Iron = 8000,2.1E11,0.28,5,1E-7
+    Polycarbonate = 1190,2.4E9,0.37,0.5,4E-7
+    Steel = 7850,2.0E11,0.29,5,3E-8
 
 class FEM_model():
     def __init__(self, vertices, tets):
@@ -17,15 +25,8 @@ class FEM_model():
         self.tets = np.asarray(tets).reshape(-1,4)
 
     def set_material(self, mat):
-        mat_config = configparser.ConfigParser()
-        mat_config.read(f'analysis/material/material-{mat}.cfg')    
-        m = mat_config['DEFAULT']
-        self.youngs = float(m['youngs'])
-        self.poison = float(m['poison'])
-        self.alpha = float(m['alpha'])
-        self.beta = float(m['beta'])
-        self.density = float(m['density'])
-
+        self.density, self.youngs, self.poison, self.beta, self.alpha = mat
+        
     def create_matrix(self):
         num = self.tets.shape[0]*12*12
         cuda_res = 64
@@ -60,7 +61,7 @@ class FEM_model():
         self.mass_matrix.eliminate_zeros()
         #self.mass_matrix.sum_duplicates()
 
-    def compute_modes(self, min_freq = 20, max_freq = 20000, modes_num = 100):
+    def compute_modes(self, min_freq = 20, max_freq = 20000, modes_num = 30):
         sigma = ((2*np.pi*max_freq)**2 + (2*np.pi*min_freq)**2)/2
         vals, vecs = eigsh(self.stiff_matrix, k=modes_num, M=self.mass_matrix,which='LM',sigma=sigma)
         while max(vals) < (2*np.pi*max_freq)**2 :

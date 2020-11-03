@@ -15,9 +15,11 @@ def work(file_list, root):
         #=========================voxelize=====================
         vox = Hexa_model(filename)
         vox.create_tetra_and_boundary()
-        if len(vox.tets) > 40000:
+        if len(vox.tets) > 20000:
             continue
-        vox.set_transform([center_scale(0.2)])
+        if len(vox.boundary_faces) > 12000:
+            continue
+        vox.set_transform([center_scale(0.15)])
         dirname = root + os.path.basename(os.path.dirname(filename))
         os.makedirs(dirname, exist_ok=True)
         np.save(dirname+'/vertices', vox.vertices)

@@ -9,7 +9,7 @@ def mel2hz(m):
     return f
 
 class FrequencyScale():
-    def __init__(self, res, min_freq = 100, max_freq = 10000):
+    def __init__(self, res, min_freq = 500, max_freq = 20000):
         self.resolution = res
         self.m_min = hz2mel(min_freq)
         self.m_max = hz2mel(max_freq)
