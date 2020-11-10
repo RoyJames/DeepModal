@@ -69,6 +69,10 @@ def work(file_list):
 
 import sys
 if __name__ == "__main__":
+<<<<<<< HEAD
     file_list = glob('dataset/' + sys.argv[1] + '/*/*')
+=======
+    file_list = glob('dataset/' + sys.argv[1] + '/*')
+>>>>>>> 9e91e9052ddc2f40996d02a5b6d3292290e83072
     print('file list gotten')
     work(file_list)

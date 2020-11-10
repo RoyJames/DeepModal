@@ -67,9 +67,15 @@ class Hexa_model(vox_model):
 
     def create_tetra_mesh(self):
         flags = self.voxel_grid.copy()
+<<<<<<< HEAD
         # flags = np.asarray(boundary.flood_dfs(flags, self.res)).reshape(self.res+2,self.res+2,self.res+2)
         # flags = flags[1:-1,1:-1,1:-1].reshape(-1)
         # flags = 1 - flags
+=======
+        flags = np.asarray(boundary.flood_dfs(flags, self.res)).reshape(self.res+2,self.res+2,self.res+2)
+        flags = flags[1:-1,1:-1,1:-1].reshape(-1)
+        flags = 1 - flags
+>>>>>>> 9e91e9052ddc2f40996d02a5b6d3292290e83072
         tets_num = flags.sum()
         flags[flags == 1] = np.arange(tets_num ,dtype=np.int32) + 1
         vertices  = np.zeros(tets_num*8*3,dtype=np.float32)

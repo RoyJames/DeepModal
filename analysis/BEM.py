@@ -99,6 +99,7 @@ class PolesMatrix():
         # print(self.all_matrix.shape)
 
     def get_grid_function(self, sphere_mesh, weights, k):
+<<<<<<< HEAD
         coeff = self.get_sphere_coeff(sphere_mesh, weights, k)
         dirichlet_fun =  GridFunction(sphere_mesh.dp0_space, coefficients=coeff)
         return dirichlet_fun
@@ -112,10 +113,17 @@ class PolesMatrix():
         return dirichlet_fun
 
     def get_sphere_coeff(self, sphere_mesh, weights, k):
+=======
+>>>>>>> 9e91e9052ddc2f40996d02a5b6d3292290e83072
         coeff = []
         for p in sphere_mesh.face_centers():
             self.poles.reset(k, p)
             self.poles.dirichlet_reset()
             coeff.append((self.poles.dirichlet*weights).sum())
         coeff = np.asarray(coeff)
+<<<<<<< HEAD
         return coeff
+=======
+        dirichlet_fun =  GridFunction(sphere_mesh.dp0_space, coefficients=coeff)
+        return dirichlet_fun
+>>>>>>> 9e91e9052ddc2f40996d02a5b6d3292290e83072
