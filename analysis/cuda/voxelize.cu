@@ -175,7 +175,8 @@ __global__ void voxelize(int *dest, int res, float *vertices, int *triangles, in
 
     dest[idx] = 0;
     float voxel_size = 1.0f/res;
-    float boxhalfsize[3] = {voxel_size/2, voxel_size/2, voxel_size/2};
+    float k = 1.1f;
+    float boxhalfsize[3] = {voxel_size/2*k, voxel_size/2*k, voxel_size/2*k};
     float boxcenter[3] = {-0.5f+ (threadIdx.x+0.5f) * voxel_size ,
                             -0.5f+ (threadIdx.y+0.5f) * voxel_size ,
                             -0.5f+ (blockIdx.x+0.5f) * voxel_size ,

@@ -1,43 +1,37 @@
-from analysis import voxel,FEM, FEM_cuda
+from analysis.voxelize import Hexa_model, center_scale
+from analysis.FEM import FEM_model
 from visualization.viewer import Viewer
 from visualization.audio_player import Player
 from glob import glob
 import numpy as np 
 from time import time
 import sys
-import argparse
-if __name__ == "__main__":
-    # ==========================args parser===============================
-    parser = argparse.ArgumentParser(description='Modal synthesis')
-    parser.add_argument('--idx', type=int, default=0, help='Mesh directory index')
-    parser.add_argument('--mat', type=int, default=4, help='Material index')
-    parser.add_argument('--scale', type=float, default=0.2, help='Scale (meter)')
-    parser.add_argument('--mesh', type=str, default='D:/abcDataset/abc', help='Mesh dataset directory (abc dataset)')
-    args = parser.parse_args()
+import open3d as o3d
 
-    if not args.idx:
-        parser.error('Index required, add --idx ')
-    # ============================pre-process=============================
-    filename = glob(f'{args.mesh}/{args.idx:08d}/*')[0]
-    print(filename)
-    vox = voxel.VOX(filename, 32)
-    vox.create_tetra_mesh_cuda(args.scale)
-    vox.create_triangle_mesh()
-    print('tetra mesh generated')
-    fem = FEM_cuda.FEM_model(vox.tetra_mesh.vertices, vox.tetra_mesh.tetras)
-    fem.set_material(args.mat)
-    fem.compute_matrix()
-    print('matrix computed')
-    fem.compute_modes(max_freq=20000)
-    print('modes computed')
+if __name__ == "__main__":
+    filename = sys.argv[1]
+    print(f'Modal synthesis of {filename}:')
+    vox = Hexa_model(filename)
+    vox.create_tetra_and_boundary()
+    vox.set_transform([center_scale(0.2)])
+    print(vox.vertices.max())
+    print('tetra mesh and boundary triangle mesh generated')
 
     
+    fem = FEM_model(vox.vertices, vox.tets)
+    fem.set_material(0)
+    fem.create_matrix()
+    fem.compute_modes(min_freq=100,max_freq=10000)
+    print('modal data generated')
+    
     # ==========================run-time demo============================
-    mesh = vox.triangle_mesh
-    audio_player = Player()
-    vis = Viewer()
-    vis.load_mesh(mesh.vertices, mesh.triangles, mesh.vertex_normals)
+    mesh = vox.boundary_mesh
+    mesh.compute_vertex_normals()
 
+    vis = Viewer()
+    vis.load_mesh(vox.vertices, mesh.triangles, mesh.vertex_normals)
+
+    audio_player = Player()
     def click_callback(index):
         amp = np.zeros(len(fem.vals))
         if index >= len(vis.faces):
@@ -53,7 +47,6 @@ if __name__ == "__main__":
         omega = np.sqrt(vals)
         omega_d = omega*np.sqrt(1 - c**2/(omega**2*4))
         amp = amp / omega_d
-        print(omega_d/(2*np.pi))
         audio_player.play(amp*1e3,omega_d/(2*np.pi),c)
 
     vis.connect_click(click_callback)

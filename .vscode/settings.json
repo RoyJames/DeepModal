@@ -1,3 +1,10 @@
 {
-    "python.pythonPath": "/home/jxt/anaconda3/envs/deepmodal/bin/python"
+    "python.pythonPath": "/home/jxt/anaconda3/envs/deepmodal/bin/python",
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "abcset/**": true,
+        "dataset/**": true
+    },
+    "git.ignoreLimitWarning": true
 }

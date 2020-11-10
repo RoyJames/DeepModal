@@ -2,4 +2,11 @@
 *.obj
 *.so
 *.msh
+*.png
+dataset/**
+dataset
+modedata
+modedata/**
 __pycache__
+weights/**
+weights

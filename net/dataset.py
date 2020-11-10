@@ -6,52 +6,60 @@ from glob import glob
 from torch_geometric.data import Data
 import numpy as np
 from tqdm import tqdm
+import math
+import random
+import torch
+from torch_geometric.transforms import LinearTransformation
+
+class RandomRotate():
+
+    def __init__(self, degrees = 180):
+        self.degrees = degrees
+
+    def __call__(self, data):
+        degree = math.pi * random.uniform(*self.degrees) / 180.0
+        sin, cos = math.sin(degree), math.cos(degree)
+        matrix1 = np.array([[1, 0, 0], [0, cos, sin], [0, -sin, cos]])
+        degree = math.pi * random.uniform(*self.degrees) / 180.0
+        sin, cos = math.sin(degree), math.cos(degree)
+        matrix2 = np.array([[cos, 0, -sin], [0, 1, 0], [sin, 0, cos]])
+        degree = math.pi * random.uniform(*self.degrees) / 180.0
+        sin, cos = math.sin(degree), math.cos(degree)
+        matrix3 = np.array([[cos, sin, 0], [-sin, cos, 0], [0, 0, 1]])
+        matrix = torch.tensor(matrix1.dot(matrix2).dot(matrix3))
+        data.pos = torch.matmul(data.pos, matrix.to(data.pos.dtype))
+        data.normal = torch.matmul(data.normal, matrix.to(data.normal.dtype))
+        return data 
+
+def RandomSample(n = 1024):
+    def transform(data):
+        faces_num = len(data.x)
+        if faces_num < n:
+            replacement = True
+        else:
+            replacement = False
+        mask = torch.multinomial(torch.ones(faces_num), n, replacement=replacement)
+        data.normal = data.normal[mask]
+        data.dis = data.dis[mask]
+        data.pos = data.pos[mask]
+        data.x = data.x[mask]
+        return data
+    return transform
+
 
 class ModalDataset(Dataset):
-    def __init__(self, root, transform=None, pre_transform=None):
+    def __init__(self, root, transforms=[]):
         super().__init__()
-        self.transform = transform
-        self.pre_transform = pre_transform
-        self.root = root
-        self.data_path_list = glob(f'{self.root}/*')
+        self.data_list = glob(f'{root}/*')
+        print(f'size of dataset {root} is {len(self.data_list)}')
+        self.transforms = transforms
 
-        #========cut half=========
-        self.data_path_list = self.data_path_list[:len(self.data_path_list)//2]
-        #=========================
-
-        self.pre_process()
-        self.processed_file_names = glob(f'{self.processed_dir}/*')
-        
-    def pre_process(self):
-        self.processed_dir = self.root.replace('G','E')
-        if os.path.exists(self.processed_dir):
-            return
-        os.mkdir(self.processed_dir)
-        print('pre process')
-        for i, data_path in  enumerate(tqdm(self.data_path_list)):
-            x = torch.FloatTensor(np.load(data_path+'/vertices.npy'))
-            y = torch.FloatTensor(np.load(data_path+'/vecs_norm.npy'))
-            y = y.reshape(y.shape[0]//3, 3, -1)
-            data = Data(x=x, y=y, pos=x)
-            if self.pre_transform is not None:
-                data = self.pre_transform(data)
-            torch.save(data, osp.join(self.processed_dir, 'data_{}.pt'.format(i)))
-
-    # def check(self):
-    #     skip = len(self.data_path_list) // 2
-    #     for i, data_path in  enumerate(tqdm(self.data_path_list)):
-    #         if i < skip:
-    #             continue
-    #         x = torch.FloatTensor(np.load(data_path+'/vertices.npy'))
-    #         y = torch.FloatTensor(np.load(data_path+'/vecs_norm.npy'))
-    #         if torch.isnan(x).any() or torch.isnan(y).any():
-    #             print(data_path)
-            
     def __len__(self):
-        return len(self.processed_file_names)
+        return len(self.data_list)
 
     def __getitem__(self, idx):
-        data = torch.load(osp.join(self.processed_dir, 'data_{}.pt'.format(idx)))
-        if self.transform is not None:
-            data = self.transform(data)
-        return {'data':data, 'path':self.data_path_list[idx]}
+        data = torch.load(self.data_list[idx])
+        for transform in self.transforms:
+            data = transform(data)
+        data.w = data.w / 1e7
+        return data
