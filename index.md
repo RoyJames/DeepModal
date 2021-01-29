@@ -9,9 +9,12 @@ Model sound synthesis is a physically-based sound synthesis method used to gener
 
 #### PDF File
 [Download Paper](https://dl.acm.org/doi/pdf/10.1145/3394171.3413572)
-#### Video
+#### Presentation slides
+[Download Slides](https://github.com/hellojxt/DeepModal/raw/gh-pages/presentation.pptx)
+#### Presentation Video
 <iframe width="560" height="315" src="https://www.youtube.com/embed/pc2pHj6t2Xk" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-
+#### Sound video clips
+[Download sound videos](https://github.com/hellojxt/DeepModal/raw/gh-pages/sound%20material.zip)
 
 
 
