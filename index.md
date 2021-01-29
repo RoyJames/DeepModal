@@ -16,7 +16,7 @@ Model sound synthesis is a physically-based sound synthesis method used to gener
 #### Sound video clips
 [Download sound videos](https://github.com/hellojxt/DeepModal/raw/gh-pages/sound%20material.zip)
 
-##Bibtex
+## Bibtex
 ```
   @inproceedings{jin2020deep,
     title={Deep-modal: real-time impact sound synthesis for arbitrary shapes},
