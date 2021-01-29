@@ -11,8 +11,6 @@ Model sound synthesis is a physically-based sound synthesis method used to gener
 
 ## Supplemental Material
 
-#### Doi 
-https://doi.org/10.1145/3394171.3413572
 #### PDF File
 [Download Paper](https://dl.acm.org/doi/pdf/10.1145/3394171.3413572)
 #### Video
